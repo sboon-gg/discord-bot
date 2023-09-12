@@ -1,13 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"os/signal"
-
-	"github.com/bwmarrin/discordgo"
 	"github.com/sboon-gg/sby-bot/pkg/config"
+	"github.com/sboon-gg/sby-bot/pkg/db"
+	"github.com/sboon-gg/sby-bot/pkg/discord"
+	"github.com/sboon-gg/sby-bot/pkg/spy"
 )
 
 func main() {
@@ -16,23 +13,14 @@ func main() {
 		panic(err)
 	}
 
-	s, err := discordgo.New(fmt.Sprintf("Bot %s", conf.Token))
-	if err != nil {
-		panic(err)
-	}
+	conn := db.New()
+	userRepo := db.NewUserRepository(conn)
+	roleRepo := db.NewRoleRepository(conn)
 
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
-	})
-	err = s.Open()
-	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
-	}
+	bot := discord.New(conf)
 
-	defer s.Close()
+	spyBot := spy.New(conf, userRepo, roleRepo)
+	spyBot.Register(bot)
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	log.Println("Press Ctrl+C to exit")
-	<-stop
+	bot.Run()
 }

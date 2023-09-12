@@ -7,7 +7,9 @@ import (
 )
 
 type Config struct {
-	Token string `yaml:"token"`
+	Token   string `yaml:"token"`
+	AppID   string `yaml:"appID"`
+	GuildID string `yaml:"guildID"`
 }
 
 func New() (*Config, error) {
