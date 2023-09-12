@@ -2,6 +2,7 @@ package spy
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -11,6 +12,10 @@ import (
 	"github.com/sboon-gg/sby-bot/pkg/db"
 	"github.com/sboon-gg/sby-bot/pkg/discord"
 	"github.com/sboon-gg/sby-bot/pkg/spy/prspy"
+)
+
+const (
+	everyoneTag = "@everyone"
 )
 
 type Bot struct {
@@ -29,48 +34,96 @@ func New(conf *config.Config, userRepo *db.UserRepository, roleRepo *db.RoleRepo
 		roleToActiveMap: make(map[string]string),
 		activeToRoleMap: make(map[string]string),
 	}
-	bot.refreshRolesCache()
 	return bot
 }
 
+var spyCommand = &discordgo.ApplicationCommand{
+	Name:        "spy",
+	Description: "Spy - translate PRSPY activity to Discord role(s)",
+	Options: []*discordgo.ApplicationCommandOption{
+		mapRoleSubCommand,
+		buttonCommand,
+	},
+}
+
 func (b *Bot) Register(client *discord.Bot) {
-	client.RegisterCommand(buttonCommand, b.showButton)
 	client.RegisterComponent(infoButton, b.handleButton)
 	client.RegisterModal(infoModal, b.handleModal)
 
-	client.RegisterCommand(mapRoleCommand, b.mapRoleHandler)
+	client.RegisterCommand(spyCommand, b.commandHandler)
 
 	go b.roleSetter(client)
 }
 
-func (b *Bot) roleSetter(client *discord.Bot) {
-	for {
-		time.Sleep(time.Minute)
-
-		players := prspy.FetchAllPlayers()
-		users := b.userRepo.FindAll()
-		b.refreshRolesCache()
-
-		for _, u := range users {
-			if p, ok := players[u.IGN]; ok {
-				if p.IsAI {
-					continue
-				}
-				b.setActiveRoles(client.S, u.DiscordID)
-			} else {
-				b.removeActiveRoles(client.S, u.DiscordID)
-			}
-		}
+func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	options := i.ApplicationCommandData().Options
+	switch options[0].Name {
+	case buttonCmdName:
+		b.showButton(s, i)
+	case rolesCmdName:
+		b.rolesHandler(s, i)
 	}
 }
 
-func (b *Bot) refreshRolesCache() {
-	roles := b.roleRepo.FindAll()
-	b.roleToActiveMap = make(map[string]string)
-	for _, role := range roles {
-		b.roleToActiveMap[role.DiscordID] = role.ActiveRoleID
-		b.activeToRoleMap[role.ActiveRoleID] = role.DiscordID
+func (b *Bot) roleSetter(client *discord.Bot) {
+	for {
+		time.Sleep(time.Second * 10)
+		players, err := prspy.FetchAllPlayers()
+		if err != nil {
+			log.Printf("Couldn't fetch PRSPY data: %s", err)
+			continue
+		}
+		users := b.userRepo.FindAll()
+		b.refreshRolesCache(client.S)
+
+		for _, u := range users {
+			if _, ok := players[u.IGN]; ok {
+				err = b.setActiveRoles(client.S, u.DiscordID)
+				if err != nil {
+					log.Printf("Couldn't set active roles: %s", err)
+				}
+			} else {
+				err = b.removeActiveRoles(client.S, u.DiscordID)
+				if err != nil {
+					log.Printf("Couldn't unset active roles: %s", err)
+				}
+			}
+		}
+
+		time.Sleep(time.Minute)
 	}
+}
+
+func (b *Bot) refreshRolesCache(s *discordgo.Session) error {
+	roles := b.roleRepo.FindAll()
+
+	b.roleToActiveMap = make(map[string]string)
+	b.activeToRoleMap = make(map[string]string)
+
+	dRoles, err := s.GuildRoles(b.config.GuildID)
+	if err != nil {
+		return err
+	}
+
+	everyoneID := ""
+
+	for _, d := range dRoles {
+		if d.Name == everyoneTag {
+			everyoneID = d.ID
+		}
+	}
+
+	for _, role := range roles {
+		id := role.DiscordID
+		activeID := role.ActiveRoleID
+		if role.DiscordID == everyoneID {
+			id = everyoneTag
+		}
+		b.roleToActiveMap[id] = activeID
+		b.activeToRoleMap[activeID] = id
+	}
+
+	return nil
 }
 
 func (b *Bot) setActiveRoles(s *discordgo.Session, discordID string) error {
@@ -80,12 +133,12 @@ func (b *Bot) setActiveRoles(s *discordgo.Session, discordID string) error {
 	}
 
 	for presentRoleID, activeRoleID := range b.roleToActiveMap {
-		if presentRoleID == "" {
-			// Empty role means @everyone
+		if presentRoleID == everyoneTag {
 			err = s.GuildMemberRoleAdd(b.config.GuildID, member.User.ID, activeRoleID)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("unable to set role %s on user %s", activeRoleID, member.User.ID))
 			}
+			continue
 		}
 
 		for _, roleID := range member.Roles {

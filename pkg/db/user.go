@@ -1,6 +1,10 @@
 package db
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -26,8 +30,30 @@ func (r *UserRepository) FindAll() []User {
 	return users
 }
 
-func (r *UserRepository) FindByDiscordID(discordID string) User {
+func (r *UserRepository) FindByDiscordID(discordID string) *User {
 	var user User
-	r.db.Where(&User{DiscordID: discordID}).First(&user)
+	result := r.db.Where(&User{DiscordID: discordID}).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil
+	}
+
+	return &user
+}
+
+func (r *UserRepository) SetInfo(discordID, ign, hash string) *User {
+	user := r.FindByDiscordID(discordID)
+	if user != nil {
+		user.IGN = ign
+		user.Hash = hash
+		r.db.Save(user)
+	} else {
+		user = &User{
+			DiscordID: discordID,
+			IGN:       ign,
+			Hash:      hash,
+		}
+		r.db.Create(user)
+	}
+
 	return user
 }

@@ -14,7 +14,7 @@ const (
 
 type player struct {
 	TagName string `json:"name"`
-	IsAI    bool   `json:"isAI"`
+	IsAI    int    `json:"isAI"`
 }
 
 func (p player) IGN() string {
@@ -57,21 +57,23 @@ func FetchData() (*prspyData, error) {
 	return &data, nil
 }
 
-func FetchAllPlayers() map[string]player {
+func FetchAllPlayers() (map[string]player, error) {
 	players := make(map[string]player)
 
 	data, err := FetchData()
 	if err != nil {
-		return players
+		return players, err
 	}
 
 	for _, sv := range data.Servers {
 		for _, p := range sv.Players {
-			players[p.IGN()] = p
+			if p.IsAI == 0 {
+				players[p.IGN()] = p
+			}
 		}
 	}
 
-	return players
+	return players, nil
 }
 
 // goroutine: fetch PRSpy data, give roles based on activity

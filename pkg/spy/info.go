@@ -7,13 +7,15 @@ import (
 )
 
 const (
-	infoButton = "infoButton"
-	infoModal  = "infoModal"
+	buttonCmdName = "button"
+	infoButton    = "infoButton"
+	infoModal     = "infoModal"
 )
 
-var buttonCommand = &discordgo.ApplicationCommand{
-	Name:        "button",
-	Description: "Test the buttons if you got courage",
+var buttonCommand = &discordgo.ApplicationCommandOption{
+	Name:        buttonCmdName,
+	Description: "Display button for users",
+	Type:        discordgo.ApplicationCommandOptionSubCommand,
 }
 
 var button = discordgo.Button{
@@ -43,49 +45,58 @@ func (b *Bot) showButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
 }
 
 func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	// TODO: read existing from DB
+	user := b.userRepo.FindByDiscordID(i.Member.User.ID)
+	ign := ""
+	hash := ""
+	if user != nil {
+		ign = user.IGN
+		hash = user.Hash
+	}
+
+	var modal = discordgo.InteractionResponseData{
+		CustomID: infoModal,
+		Title:    "Info modal",
+		Components: []discordgo.MessageComponent{
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "ign",
+						Label:       "What is your in-game name (without tag)?",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "",
+						Required:    true,
+						MaxLength:   20,
+						MinLength:   4,
+						Value:       ign,
+					},
+				},
+			},
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "hash",
+						Label:       "What is your hash?",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "",
+						Required:    false,
+						MaxLength:   32,
+						MinLength:   32,
+						Value:       hash,
+					},
+				},
+			},
+		},
+	}
+
+	modalResponse := discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &modal,
+	}
+
 	err := s.InteractionRespond(i.Interaction, &modalResponse)
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-var modalResponse = discordgo.InteractionResponse{
-	Type: discordgo.InteractionResponseModal,
-	Data: &modal,
-}
-
-var modal = discordgo.InteractionResponseData{
-	CustomID: infoModal,
-	Title:    "Info modal",
-	Components: []discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.TextInput{
-					CustomID:    "ign",
-					Label:       "What is your in-game name (without tag)?",
-					Style:       discordgo.TextInputShort,
-					Placeholder: "cassius23",
-					Required:    true,
-					MaxLength:   20,
-					MinLength:   4,
-				},
-			},
-		},
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.TextInput{
-					CustomID:    "hash",
-					Label:       "What is your hash?",
-					Style:       discordgo.TextInputShort,
-					Placeholder: "",
-					Required:    false,
-					MaxLength:   32,
-					MinLength:   32,
-				},
-			},
-		},
-	},
 }
 
 func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -93,7 +104,7 @@ func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	ign := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 	hash := data.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 
-	// TODO: save into DB
+	b.userRepo.SetInfo(i.Member.User.ID, ign, hash)
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
