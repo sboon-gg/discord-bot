@@ -52,7 +52,16 @@ func (b *Bot) Register(client *discord.Bot) {
 
 	client.RegisterCommand(spyCommand, b.commandHandler)
 
-	go b.roleSetter(client.Session())
+	go func() {
+		for {
+			err := b.roleSetter(client.Session())
+			if err != nil {
+				log.Print(err)
+			}
+
+			time.Sleep(time.Minute)
+		}
+	}()
 }
 
 func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -65,33 +74,29 @@ func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 	}
 }
 
-func (b *Bot) roleSetter(s *discordgo.Session) {
-	for {
-		players, err := prspy.FetchAllPlayers()
-		if err != nil {
-			log.Printf("Couldn't fetch PRSPY data: %s", err)
-			continue
-		}
-		users := b.userRepo.FindAll()
-		b.refreshRolesCache(s)
-
-		for _, u := range users {
-			if _, ok := players[u.IGN]; ok {
-				err = b.setActiveRoles(s, u.DiscordID)
-				if err != nil {
-					log.Printf("Couldn't set active roles: %s", err)
-				}
-			} else {
-				err = b.removeActiveRoles(s, u.DiscordID)
-				if err != nil {
-					log.Printf("Couldn't unset active roles: %s", err)
-				}
-			}
-
-		}
-
-		time.Sleep(time.Minute)
+func (b *Bot) roleSetter(s *discordgo.Session) error {
+	players, err := prspy.FetchAllPlayers()
+	if err != nil {
+		return errors.Wrap(err, "Couldn't fetch PRSPY data")
 	}
+	users := b.userRepo.FindAll()
+	b.refreshRolesCache(s)
+
+	for _, u := range users {
+		if _, ok := players[u.IGN]; ok {
+			err = b.setActiveRoles(s, u.DiscordID)
+			if err != nil {
+				return errors.Wrap(err, "Couldn't set active roles")
+			}
+		} else {
+			err = b.removeActiveRoles(s, u.DiscordID)
+			if err != nil {
+				return errors.Wrap(err, "Couldn't unset active roles")
+			}
+		}
+	}
+
+	return nil
 }
 
 func (b *Bot) refreshRolesCache(s *discordgo.Session) error {

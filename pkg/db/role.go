@@ -38,25 +38,38 @@ func (r *RoleRepository) FindByDiscordID(discordID string) *Role {
 	return &role
 }
 
-func (r *RoleRepository) SetMapping(roleID, activeRoleID string) *Role {
+func (r *RoleRepository) SetMapping(roleID, activeRoleID string) (*Role, error) {
 	role := r.FindByDiscordID(roleID)
 	if role != nil {
 		role.ActiveRoleID = activeRoleID
-		r.db.Save(role)
+
+		result := r.db.Save(role)
+		if result.Error != nil {
+			return nil, result.Error
+		}
 	} else {
 		role = &Role{
 			DiscordID:    roleID,
 			ActiveRoleID: activeRoleID,
 		}
-		r.db.Create(role)
+
+		result := r.db.Create(role)
+		if result.Error != nil {
+			return nil, result.Error
+		}
 	}
 
-	return role
+	return role, nil
 }
 
-func (r *RoleRepository) UnsetMapping(roleID string) {
+func (r *RoleRepository) UnsetMapping(roleID string) error {
 	role := r.FindByDiscordID(roleID)
 	if role != nil {
-		r.db.Delete(role)
+		result := r.db.Delete(role)
+		if result.Error != nil {
+			return result.Error
+		}
 	}
+
+	return nil
 }

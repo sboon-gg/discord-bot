@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sboon-gg/discord-bot/pkg/discord"
 )
 
 const (
@@ -101,9 +102,8 @@ func (b *Bot) rolesListHandler(s *discordgo.Session, i *discordgo.InteractionCre
 	}
 
 	err := s.InteractionRespond(i.Interaction, resp)
-
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
 
@@ -113,7 +113,11 @@ func (b *Bot) rolesSetHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 	role := options[0].Value.(string)
 	activeRole := options[1].Value.(string)
 
-	b.roleRepo.SetMapping(role, activeRole)
+	_, err := b.roleRepo.SetMapping(role, activeRole)
+	if err != nil {
+		discord.ErrorResponse(s, i.Interaction, err)
+		return
+	}
 
 	b.rolesListHandler(s, i)
 }
@@ -122,7 +126,11 @@ func (b *Bot) rolesUnsetHandler(s *discordgo.Session, i *discordgo.InteractionCr
 	options := i.ApplicationCommandData().Options[0].Options[0].Options
 	roleID := options[0].Value.(string)
 
-	b.roleRepo.UnsetMapping(roleID)
+	err := b.roleRepo.UnsetMapping(roleID)
+	if err != nil {
+		discord.ErrorResponse(s, i.Interaction, err)
+		return
+	}
 
 	b.rolesListHandler(s, i)
 }

@@ -40,7 +40,7 @@ var buttonResponse = discordgo.InteractionResponse{
 func (b *Bot) showButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &buttonResponse)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
 
@@ -95,7 +95,7 @@ func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate)
 
 	err := s.InteractionRespond(i.Interaction, &modalResponse)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
 
@@ -128,6 +128,6 @@ func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) 
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
