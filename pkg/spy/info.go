@@ -47,10 +47,10 @@ func (b *Bot) showButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
 func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	user := b.userRepo.FindByDiscordID(i.Member.User.ID)
 	ign := ""
-	hash := ""
+	// hash := ""
 	if user != nil {
 		ign = user.IGN
-		hash = user.Hash
+		// hash = user.Hash
 	}
 
 	var modal = discordgo.InteractionResponseData{
@@ -71,20 +71,20 @@ func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate)
 					},
 				},
 			},
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "hash",
-						Label:       "What is your hash?",
-						Style:       discordgo.TextInputShort,
-						Placeholder: "",
-						Required:    false,
-						MaxLength:   32,
-						MinLength:   32,
-						Value:       hash,
-					},
-				},
-			},
+			// discordgo.ActionsRow{
+			// 	Components: []discordgo.MessageComponent{
+			// 		discordgo.TextInput{
+			// 			CustomID:    "hash",
+			// 			Label:       "What is your hash?",
+			// 			Style:       discordgo.TextInputShort,
+			// 			Placeholder: "",
+			// 			Required:    false,
+			// 			MaxLength:   32,
+			// 			MinLength:   32,
+			// 			Value:       hash,
+			// 		},
+			// 	},
+			// },
 		},
 	}
 
@@ -102,9 +102,9 @@ func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate)
 func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ModalSubmitData()
 	ign := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-	hash := data.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+	// hash := data.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 
-	b.userRepo.SetInfo(i.Member.User.ID, ign, hash)
+	b.userRepo.SetInfo(i.Member.User.ID, ign, "")
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -117,10 +117,10 @@ func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) 
 							Name:  "In-game name",
 							Value: ign,
 						},
-						{
-							Name:  "Hash",
-							Value: hash,
-						},
+						// {
+						// 	Name:  "Hash",
+						// 	Value: hash,
+						// },
 					},
 				},
 			},
