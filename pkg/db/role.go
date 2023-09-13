@@ -7,7 +7,7 @@ import (
 )
 
 type Role struct {
-	gorm.Model
+	ID           uint   `gorm:"primarykey"`
 	DiscordID    string `gorm:"uniqueIndex"`
 	ActiveRoleID string
 }
