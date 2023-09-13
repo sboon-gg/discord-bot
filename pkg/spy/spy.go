@@ -88,8 +88,9 @@ func (b *Bot) roleSetter(s *discordgo.Session) {
 				}
 			}
 
-			time.Sleep(time.Minute)
 		}
+
+		time.Sleep(time.Minute)
 	}
 }
 
