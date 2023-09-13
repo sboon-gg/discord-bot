@@ -3,7 +3,7 @@ package prspy_test
 import (
 	"testing"
 
-	"github.com/sboon-gg/sby-bot/pkg/spy/prspy"
+	"github.com/sboon-gg/discord-bot/pkg/spy/prspy"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/sboon-gg/sby-bot/pkg/config"
+	"github.com/sboon-gg/discord-bot/pkg/config"
 )
 
 type Handler func(*discordgo.Session, *discordgo.InteractionCreate)

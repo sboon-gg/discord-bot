@@ -1,4 +1,4 @@
-module github.com/sboon-gg/sby-bot
+module github.com/sboon-gg/discord-bot
 
 go 1.21
 

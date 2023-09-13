@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sboon-gg/sby-bot/pkg/config"
-	"github.com/sboon-gg/sby-bot/pkg/db"
-	"github.com/sboon-gg/sby-bot/pkg/discord"
-	"github.com/sboon-gg/sby-bot/pkg/spy"
+	"github.com/sboon-gg/discord-bot/pkg/config"
+	"github.com/sboon-gg/discord-bot/pkg/db"
+	"github.com/sboon-gg/discord-bot/pkg/discord"
+	"github.com/sboon-gg/discord-bot/pkg/spy"
 )
 
 func main() {
