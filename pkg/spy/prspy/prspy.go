@@ -2,7 +2,7 @@ package prspy
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -40,7 +40,7 @@ func FetchData() (*prspyData, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Invalid status code")
+		return nil, fmt.Errorf("Invalid status code: %s", resp.Status)
 	}
 
 	body, err := io.ReadAll(resp.Body)
