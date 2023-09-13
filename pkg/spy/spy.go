@@ -87,9 +87,9 @@ func (b *Bot) roleSetter(s *discordgo.Session) {
 					log.Printf("Couldn't unset active roles: %s", err)
 				}
 			}
-		}
 
-		time.Sleep(time.Minute)
+			time.Sleep(time.Minute)
+		}
 	}
 }
 
