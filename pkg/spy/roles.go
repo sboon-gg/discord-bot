@@ -81,7 +81,13 @@ func (b *Bot) rolesListHandler(s *discordgo.Session, i *discordgo.InteractionCre
 		})
 	}
 
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	if len(fields) == 0 {
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Value: "No mappings",
+		})
+	}
+
+	resp := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: "List of mapped roles",
@@ -92,7 +98,9 @@ func (b *Bot) rolesListHandler(s *discordgo.Session, i *discordgo.InteractionCre
 			},
 			Flags: discordgo.MessageFlagsEphemeral,
 		},
-	})
+	}
+
+	err := s.InteractionRespond(i.Interaction, resp)
 
 	if err != nil {
 		log.Fatal(err)
