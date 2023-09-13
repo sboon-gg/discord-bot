@@ -52,7 +52,7 @@ func (b *Bot) Register(client *discord.Bot) {
 
 	client.RegisterCommand(spyCommand, b.commandHandler)
 
-	go b.roleSetter(client)
+	go b.roleSetter(client.Session())
 }
 
 func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -65,25 +65,24 @@ func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 	}
 }
 
-func (b *Bot) roleSetter(client *discord.Bot) {
+func (b *Bot) roleSetter(s *discordgo.Session) {
 	for {
-		time.Sleep(time.Second * 10)
 		players, err := prspy.FetchAllPlayers()
 		if err != nil {
 			log.Printf("Couldn't fetch PRSPY data: %s", err)
 			continue
 		}
 		users := b.userRepo.FindAll()
-		b.refreshRolesCache(client.S)
+		b.refreshRolesCache(s)
 
 		for _, u := range users {
 			if _, ok := players[u.IGN]; ok {
-				err = b.setActiveRoles(client.S, u.DiscordID)
+				err = b.setActiveRoles(s, u.DiscordID)
 				if err != nil {
 					log.Printf("Couldn't set active roles: %s", err)
 				}
 			} else {
-				err = b.removeActiveRoles(client.S, u.DiscordID)
+				err = b.removeActiveRoles(s, u.DiscordID)
 				if err != nil {
 					log.Printf("Couldn't unset active roles: %s", err)
 				}

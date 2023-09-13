@@ -22,7 +22,7 @@ type Bot struct {
 	commands           map[string]Command
 	components         map[string]Handler
 	modals             map[string]Handler
-	S                  *discordgo.Session
+	s                  *discordgo.Session
 	registeredCommands []*discordgo.ApplicationCommand
 }
 
@@ -34,7 +34,7 @@ func New(conf *config.Config) *Bot {
 
 	c := &Bot{
 		Config: conf,
-		S:      s,
+		s:      s,
 
 		commands:           make(map[string]Command),
 		components:         make(map[string]Handler),
@@ -47,23 +47,27 @@ func New(conf *config.Config) *Bot {
 	return c
 }
 
-func (c *Bot) prepareSession() {
-	c.S.AddHandler(c.interactionsRouter)
+func (b *Bot) Session() *discordgo.Session {
+	return b.s
+}
 
-	c.S.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+func (c *Bot) prepareSession() {
+	c.s.AddHandler(c.interactionsRouter)
+
+	c.s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 }
 
 func (c *Bot) Run() {
-	err := c.S.Open()
+	err := c.s.Open()
 	if err != nil {
 		log.Fatalf("Cannot open the session: %v", err)
 	}
 
 	c.createCommands()
 
-	defer c.S.Close()
+	defer c.s.Close()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
@@ -77,15 +81,15 @@ func (c *Bot) interactionsRouter(s *discordgo.Session, i *discordgo.InteractionC
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := c.commands[i.ApplicationCommandData().Name]; ok {
-			h.Handler(c.S, i)
+			h.Handler(s, i)
 		}
 	case discordgo.InteractionMessageComponent:
 		if h, ok := c.components[i.MessageComponentData().CustomID]; ok {
-			h(c.S, i)
+			h(s, i)
 		}
 	case discordgo.InteractionModalSubmit:
 		if h, ok := c.modals[i.ModalSubmitData().CustomID]; ok {
-			h(c.S, i)
+			h(s, i)
 		}
 	}
 }
@@ -107,7 +111,7 @@ func (c *Bot) RegisterModal(id string, handler Handler) {
 
 func (c *Bot) createCommands() {
 	for _, command := range c.commands {
-		cmd, err := c.S.ApplicationCommandCreate(c.Config.AppID, c.Config.GuildID, command.Command)
+		cmd, err := c.s.ApplicationCommandCreate(c.Config.AppID, c.Config.GuildID, command.Command)
 		if err != nil {
 			log.Fatalf("Cannot create slash command: %v", err)
 		}
@@ -119,7 +123,7 @@ func (c *Bot) createCommands() {
 func (c *Bot) deleteCommands() {
 	log.Println("Removing commands...")
 	for _, cmd := range c.registeredCommands {
-		err := c.S.ApplicationCommandDelete(c.S.State.User.ID, c.Config.GuildID, cmd.ID)
+		err := c.s.ApplicationCommandDelete(c.s.State.User.ID, c.Config.GuildID, cmd.ID)
 		if err != nil {
 			log.Panicf("Cannot delete '%v' command: %v", cmd.Name, err)
 		}
