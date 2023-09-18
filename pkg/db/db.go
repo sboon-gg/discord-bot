@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/glebarez/sqlite"
+	"github.com/sboon-gg/sboon-bot/pkg/config"
 	"gorm.io/gorm"
 )
 
@@ -9,8 +10,8 @@ type Db struct {
 	*gorm.DB
 }
 
-func New() *Db {
-	db, err := gorm.Open(sqlite.Open("bot.db"), &gorm.Config{})
+func New(conf *config.DbConfig) *Db {
+	db, err := gorm.Open(sqlite.Open(conf.Filename), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}

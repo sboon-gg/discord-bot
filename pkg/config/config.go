@@ -6,14 +6,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	Token   string `yaml:"token"`
-	AppID   string `yaml:"appID"`
-	GuildID string `yaml:"guildID"`
+type DbConfig struct {
+	Filename string `yaml:"filename"`
 }
 
-func New() (*Config, error) {
-	content, err := os.ReadFile("config.yaml")
+type Config struct {
+	Token   string   `yaml:"token"`
+	AppID   string   `yaml:"appID"`
+	GuildID string   `yaml:"guildID"`
+	Db      DbConfig `yaml:"db"`
+}
+
+func New(filename string) (*Config, error) {
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
