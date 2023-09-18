@@ -82,7 +82,10 @@ func (b *Bot) roleSetter(s *discordgo.Session) error {
 
 	players := prspy.GetAllPlayers(prspyData)
 	users := b.userRepo.FindAll()
-	b.refreshRolesCache(s)
+	err = b.refreshRolesCache(s)
+	if err != nil {
+		return errors.Wrap(err, "Couldn't refresh roles")
+	}
 
 	for _, u := range users {
 		if _, ok := players[u.IGN]; ok {
