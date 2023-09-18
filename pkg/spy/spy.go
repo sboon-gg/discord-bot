@@ -37,6 +37,8 @@ func New(conf *config.Config, userRepo *db.UserRepository, roleRepo *db.RoleRepo
 	return bot
 }
 
+var spyCommandPermission = int64(discordgo.PermissionManageServer)
+
 var spyCommand = &discordgo.ApplicationCommand{
 	Name:        "spy",
 	Description: "Spy - translate PRSPY activity to Discord role(s)",
@@ -44,6 +46,7 @@ var spyCommand = &discordgo.ApplicationCommand{
 		mapRoleSubCommand,
 		buttonCommand,
 	},
+	DefaultMemberPermissions: &spyCommandPermission,
 }
 
 func (b *Bot) Register(client *discord.Bot) {
