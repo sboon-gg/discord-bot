@@ -31,7 +31,7 @@ var buttonResponse = discordgo.InteractionResponse{
 			{
 				Title: "PR Activity",
 				Description: `
-When you'll play on a public server, you'll be assigned role on Discord.
+When you are playing on a public server, you will be assigned a role on Discord.
 Just insert your in-game name (without tag).
 
 **Click** the **button** below to **start**.`,
