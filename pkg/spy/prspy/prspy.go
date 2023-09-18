@@ -12,28 +12,28 @@ const (
 	PRSPY_URL = "https://servers.realitymod.com/api/ServerInfo"
 )
 
-type player struct {
+type Player struct {
 	TagName string `json:"name"`
 	IsAI    int    `json:"isAI"`
 }
 
-func (p player) IGN() string {
+func (p Player) IGN() string {
 	return strings.Split(p.TagName, " ")[1]
 }
 
-func (p player) Tag() string {
+func (p Player) Tag() string {
 	return strings.Split(p.TagName, " ")[0]
 }
 
-type server struct {
-	Players []player `json:"players"`
+type Server struct {
+	Players []Player `json:"players"`
 }
 
-type prspyData struct {
-	Servers []server `json:"servers"`
+type PRSpyData struct {
+	Servers []Server `json:"servers"`
 }
 
-func FetchData() (*prspyData, error) {
+func FetchData() (*PRSpyData, error) {
 	resp, err := http.Get(PRSPY_URL)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func FetchData() (*prspyData, error) {
 		return nil, err
 	}
 
-	var data prspyData
+	var data PRSpyData
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		return nil, err
@@ -57,13 +57,8 @@ func FetchData() (*prspyData, error) {
 	return &data, nil
 }
 
-func FetchAllPlayers() (map[string]player, error) {
-	players := make(map[string]player)
-
-	data, err := FetchData()
-	if err != nil {
-		return players, err
-	}
+func GetAllPlayers(data *PRSpyData) map[string]Player {
+	players := make(map[string]Player)
 
 	for _, sv := range data.Servers {
 		for _, p := range sv.Players {
@@ -73,8 +68,5 @@ func FetchAllPlayers() (map[string]player, error) {
 		}
 	}
 
-	return players, nil
+	return players
 }
-
-// goroutine: fetch PRSpy data, give roles based on activity
-// remove all ingame roles on inactivity

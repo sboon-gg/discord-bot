@@ -48,7 +48,7 @@ var spyCommand = &discordgo.ApplicationCommand{
 
 func (b *Bot) Register(client *discord.Bot) {
 	client.RegisterComponent(infoButton, b.handleButton)
-	client.RegisterModal(infoModal, b.handleModal)
+	client.RegisterModal(playerInfoModal, b.handleModal)
 
 	client.RegisterCommand(spyCommand, b.commandHandler)
 
@@ -75,10 +75,12 @@ func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 }
 
 func (b *Bot) roleSetter(s *discordgo.Session) error {
-	players, err := prspy.FetchAllPlayers()
+	prspyData, err := prspy.FetchData()
 	if err != nil {
 		return errors.Wrap(err, "Couldn't fetch PRSPY data")
 	}
+
+	players := prspy.GetAllPlayers(prspyData)
 	users := b.userRepo.FindAll()
 	b.refreshRolesCache(s)
 

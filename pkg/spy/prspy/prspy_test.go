@@ -11,4 +11,7 @@ func TestFetchData(t *testing.T) {
 	data, err := prspy.FetchData()
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
+
+	players := prspy.GetAllPlayers(data)
+	assert.NotNil(t, players)
 }
