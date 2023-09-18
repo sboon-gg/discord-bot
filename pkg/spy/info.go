@@ -7,19 +7,19 @@ import (
 )
 
 const (
-	buttonCmdName = "button"
-	infoButton    = "infoButton"
-	infoModal     = "infoModal"
+	buttonCmdName   = "button"
+	infoButton      = "infoButton"
+	playerInfoModal = "infoModal"
 )
 
 var buttonCommand = &discordgo.ApplicationCommandOption{
 	Name:        buttonCmdName,
-	Description: "Display button for users",
+	Description: "Display button for users to put their info in",
 	Type:        discordgo.ApplicationCommandOptionSubCommand,
 }
 
 var button = discordgo.Button{
-	Label:    "Insert info",
+	Label:    "Player info form",
 	Style:    discordgo.SuccessButton,
 	CustomID: infoButton,
 }
@@ -27,6 +27,16 @@ var button = discordgo.Button{
 var buttonResponse = discordgo.InteractionResponse{
 	Type: discordgo.InteractionResponseChannelMessageWithSource,
 	Data: &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title: "PR Activity",
+				Description: `
+When you'll play on a public server, you'll be assigned role on Discord.
+Just insert your in-game name (without tag).
+
+**Click** the **button** below to **start**.`,
+			},
+		},
 		Components: []discordgo.MessageComponent{
 			&discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
@@ -53,9 +63,9 @@ func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate)
 		// hash = user.Hash
 	}
 
-	var modal = discordgo.InteractionResponseData{
-		CustomID: infoModal,
-		Title:    "Info modal",
+	modal := discordgo.InteractionResponseData{
+		CustomID: playerInfoModal,
+		Title:    "Player info",
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
