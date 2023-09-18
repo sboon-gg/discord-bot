@@ -8,10 +8,10 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/sboon-gg/discord-bot/pkg/config"
-	"github.com/sboon-gg/discord-bot/pkg/db"
-	"github.com/sboon-gg/discord-bot/pkg/discord"
-	"github.com/sboon-gg/discord-bot/pkg/spy/prspy"
+	"github.com/sboon-gg/sboon-bot/pkg/config"
+	"github.com/sboon-gg/sboon-bot/pkg/db"
+	"github.com/sboon-gg/sboon-bot/pkg/discord"
+	"github.com/sboon-gg/sboon-bot/pkg/spy/prspy"
 )
 
 const (

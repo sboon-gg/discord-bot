@@ -1,4 +1,4 @@
-module github.com/sboon-gg/discord-bot
+module github.com/sboon-gg/sboon-bot
 
 go 1.21
 

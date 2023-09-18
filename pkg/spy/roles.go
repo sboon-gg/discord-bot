@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/sboon-gg/discord-bot/pkg/discord"
+	"github.com/sboon-gg/sboon-bot/pkg/discord"
 )
 
 const (
