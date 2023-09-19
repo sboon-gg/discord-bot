@@ -31,8 +31,8 @@ var buttonResponse = discordgo.InteractionResponse{
 			{
 				Title: "PR Activity",
 				Description: `
-When you are playing on a public server, you will be assigned a role on Discord.
-Just insert your in-game name (without tag).
+By activating this bot, whenever you are playing PR on a public server, you will be assigned a role on SBOON Discord to inform that you are in-game.
+To activate the bot, just insert your in-game name (without tag).
 
 **Click** the **button** below to **start**.`,
 			},
@@ -119,7 +119,12 @@ func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Thank you",
+			Content: `
+Thank you.
+
+Next time you get on the battlefield, you will be assigned the "Playing" role.
+Use this to coordinate with your mates, and have fun!
+`,
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Fields: []*discordgo.MessageEmbedField{
