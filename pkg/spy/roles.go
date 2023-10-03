@@ -60,7 +60,7 @@ var mapRoleSubCommand = &discordgo.ApplicationCommandOption{
 	},
 }
 
-func (b *Bot) rolesHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) rolesHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := i.ApplicationCommandData().Options[0].Options
 
 	switch options[0].Name {
@@ -73,7 +73,7 @@ func (b *Bot) rolesHandler(s *discordgo.Session, i *discordgo.InteractionCreate)
 	}
 }
 
-func (b *Bot) rolesListHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) rolesListHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	fields := []*discordgo.MessageEmbedField{}
 
 	for _, role := range b.roleRepo.FindAll() {
@@ -107,7 +107,7 @@ func (b *Bot) rolesListHandler(s *discordgo.Session, i *discordgo.InteractionCre
 	}
 }
 
-func (b *Bot) rolesSetHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) rolesSetHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := i.ApplicationCommandData().Options[0].Options[0].Options
 
 	role := options[0].Value.(string)
@@ -122,7 +122,7 @@ func (b *Bot) rolesSetHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 	b.rolesListHandler(s, i)
 }
 
-func (b *Bot) rolesUnsetHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) rolesUnsetHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := i.ApplicationCommandData().Options[0].Options[0].Options
 	roleID := options[0].Value.(string)
 

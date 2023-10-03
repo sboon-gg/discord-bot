@@ -18,7 +18,7 @@ const (
 	everyoneTag = "@everyone"
 )
 
-type Bot struct {
+type Spy struct {
 	config          *config.Config
 	userRepo        *db.UserRepository
 	roleRepo        *db.RoleRepository
@@ -26,8 +26,8 @@ type Bot struct {
 	activeToRoleMap map[string]string
 }
 
-func New(conf *config.Config, userRepo *db.UserRepository, roleRepo *db.RoleRepository) *Bot {
-	bot := &Bot{
+func New(conf *config.Config, userRepo *db.UserRepository, roleRepo *db.RoleRepository) *Spy {
+	bot := &Spy{
 		config:          conf,
 		userRepo:        userRepo,
 		roleRepo:        roleRepo,
@@ -49,7 +49,7 @@ var spyCommand = &discordgo.ApplicationCommand{
 	DefaultMemberPermissions: &spyCommandPermission,
 }
 
-func (b *Bot) Register(client *discord.Bot) {
+func (b *Spy) Register(client *discord.Bot) {
 	client.RegisterComponent(infoButton, b.handleButton)
 	client.RegisterModal(playerInfoModal, b.handleModal)
 
@@ -67,7 +67,7 @@ func (b *Bot) Register(client *discord.Bot) {
 	}()
 }
 
-func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := i.ApplicationCommandData().Options
 	switch options[0].Name {
 	case buttonCmdName:
@@ -77,7 +77,7 @@ func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 	}
 }
 
-func (b *Bot) roleSetter(s *discordgo.Session) error {
+func (b *Spy) roleSetter(s *discordgo.Session) error {
 	prspyData, err := prspy.FetchData()
 	if err != nil {
 		return errors.Wrap(err, "Couldn't fetch PRSPY data")
@@ -107,7 +107,7 @@ func (b *Bot) roleSetter(s *discordgo.Session) error {
 	return nil
 }
 
-func (b *Bot) refreshRolesCache(s *discordgo.Session) error {
+func (b *Spy) refreshRolesCache(s *discordgo.Session) error {
 	roles := b.roleRepo.FindAll()
 
 	b.roleToActiveMap = make(map[string]string)
@@ -139,7 +139,7 @@ func (b *Bot) refreshRolesCache(s *discordgo.Session) error {
 	return nil
 }
 
-func (b *Bot) setActiveRoles(s *discordgo.Session, discordID string) error {
+func (b *Spy) setActiveRoles(s *discordgo.Session, discordID string) error {
 	member, err := s.GuildMember(b.config.GuildID, discordID)
 	if err != nil {
 		return err
@@ -169,7 +169,7 @@ func (b *Bot) setActiveRoles(s *discordgo.Session, discordID string) error {
 	return nil
 }
 
-func (b *Bot) removeActiveRoles(s *discordgo.Session, discordID string) error {
+func (b *Spy) removeActiveRoles(s *discordgo.Session, discordID string) error {
 	member, err := s.GuildMember(b.config.GuildID, discordID)
 	if err != nil {
 		return err

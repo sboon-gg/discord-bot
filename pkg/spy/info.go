@@ -47,14 +47,14 @@ To activate the bot, just insert your in-game name (without tag).
 	},
 }
 
-func (b *Bot) showButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) showButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &buttonResponse)
 	if err != nil {
 		log.Print(err)
 	}
 }
 
-func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	user := b.userRepo.FindByDiscordID(i.Member.User.ID)
 	ign := ""
 	// hash := ""
@@ -109,7 +109,7 @@ func (b *Bot) handleButton(s *discordgo.Session, i *discordgo.InteractionCreate)
 	}
 }
 
-func (b *Bot) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (b *Spy) handleModal(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ModalSubmitData()
 	ign := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 	// hash := data.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
