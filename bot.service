@@ -5,8 +5,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=burn
-Group=burn
+User=sboon
+Group=sboon
 
 WorkingDirectory=/home/sboon/bot
 ExecStart=/home/sboon/bot/sboon-bot
