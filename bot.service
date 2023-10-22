@@ -1,0 +1,22 @@
+[Unit]
+Description=SBOON Bot
+ConditionPathExists=/home/sboon/bot
+After=network.target
+
+[Service]
+Type=simple
+User=burn
+Group=burn
+
+WorkingDirectory=/home/sboon/bot
+ExecStart=/home/sboon/bot/sboon-bot
+
+Restart=on-failure
+RestartSec=10
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sboon-bot
+
+[Install]
+WantedBy=multi-user.target
